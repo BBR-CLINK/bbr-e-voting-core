@@ -96,6 +96,7 @@ func voting(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
+	voteType := Bc.FindVoteReg([]byte(voting.Meta))
 	/*
 	1. token 확인
 	2. VoteType 확인
@@ -118,6 +119,7 @@ func voteType(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&votingType); err != nil {
 		log.Fatal(err)
 	}
+	enableCors(&w)
 
 	voteType := Bc.FindVoteReg([]byte(votingType.Meta))
 	fmt.Println(voteType)
