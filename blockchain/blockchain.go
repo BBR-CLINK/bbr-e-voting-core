@@ -7,7 +7,8 @@ import (
 	"log"
 	"time"
 	"bbr-e-voting-core/util"
-	)
+	"errors"
+)
 
 var dbFile = "%s_blockData"
 const genesisData = "C-LINK E-VOTING SYSTEM"
@@ -177,7 +178,7 @@ func (i *BlockchainIterator) Next() *Block {
 	return block
 }
 
-func (bc *Blockchain) FindVoteReg(meta []byte) *VoteType {
+func (bc *Blockchain) FindVoteReg(meta []byte) (*VoteType, error) {
 	bci := bc.Iterator()
 	var voteType *VoteType
 	for {
@@ -185,6 +186,7 @@ func (bc *Blockchain) FindVoteReg(meta []byte) *VoteType {
 
 		if util.Equal(block.Votes[0].VoteType.Meta, meta) && time.Now().Unix() > block.Votes[0].VoteType.S_timestamp && time.Now().Unix() < block.Votes[0].VoteType.E_timestamp {
 			voteType = block.Votes[0].VoteType
+			return voteType, nil
 		}
 
 		if len(block.PreviousHash) == 0 {
@@ -192,8 +194,20 @@ func (bc *Blockchain) FindVoteReg(meta []byte) *VoteType {
 		}
 	}
 
-	return voteType
+	return nil, errors.New("VoteReg nil")
 }
+//
+//func (bc *Blockchain) FindVoteToken(publicKey []byte, meta []byte) bool {
+//	bci := bc.Iterator()
+//	metaStr := string(meta[:])
+//
+//	for {
+//		block := bci.Next()
+//
+//		if block.Votes[0].Voting == nil && util.Equal(block.Votes[0].Account.PublicKey)
+//	}
+//
+//}
 
 func (bc *Blockchain) FindBlockByIndex(index int) *Block {
 	bci := bc.Iterator()
