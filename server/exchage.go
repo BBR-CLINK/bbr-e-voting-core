@@ -1,26 +1,25 @@
 package server
 
 import (
-	"net"
 	"bbrHack/blockchain"
-	"fmt"
-	"sync"
-	"log"
+	"bbrHack/node"
 	"bytes"
 	"encoding/gob"
+	"fmt"
 	"io"
-	"bbrHack/node"
+	"log"
+	"net"
+	"sync"
 )
 
 const commandLength = 12
+
 var mutex = &sync.Mutex{}
 
-
 type BlockExchange struct {
-
 }
 
-func (be BlockExchange)DataExchange(ln net.Listener, connNeighbor node.Node){
+func (be BlockExchange) DataExchange(ln net.Listener, connNeighbor node.Node) {
 	go func() {
 
 		connMe, err := ln.Accept()
@@ -33,7 +32,7 @@ func (be BlockExchange)DataExchange(ln net.Listener, connNeighbor node.Node){
 	}()
 }
 
-func sendBlock(block blockchain.Block, connNeighbor node.Node){
+func sendBlock(block blockchain.Block, connNeighbor node.Node) {
 	request := append(commandToBytes("block"), block.Serialize()...)
 	log.Printf("[Block] Send Block to %s", connNeighbor.IP)
 	//spew.Dump(block)
@@ -43,7 +42,7 @@ func sendBlock(block blockchain.Block, connNeighbor node.Node){
 	}
 }
 
-func handleBlock(connMe net.Conn, connNeighbor node.Node){
+func handleBlock(connMe net.Conn, connNeighbor node.Node) {
 	request := make([]byte, 4096)
 
 	n, err := connMe.Read(request)
@@ -55,12 +54,12 @@ func handleBlock(connMe net.Conn, connNeighbor node.Node){
 	command := bytesToCommand(request[:commandLength])
 
 	switch command {
-	case "block" :
+	case "block":
 		receiveBlock(request, connNeighbor)
 	}
 
 }
-func receiveBlock(request []byte, connNeighbor node.Node){
+func receiveBlock(request []byte, connNeighbor node.Node) {
 	var buff bytes.Buffer
 	var payload blockchain.Block
 

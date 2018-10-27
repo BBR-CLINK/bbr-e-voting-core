@@ -1,15 +1,14 @@
 package node
 
 import (
-	"net"
 	"bytes"
 	"encoding/gob"
 	"log"
+	"net"
 )
 
-
-type Node struct{
-	IP string
+type Node struct {
+	IP   string
 	Port string
 	Conn net.Conn
 }

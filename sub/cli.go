@@ -1,8 +1,8 @@
 package sub
 
 import (
+	"bbrHack/server"
 	"github.com/urfave/cli"
-			"bbrHack/server"
 )
 
 //var StartCmd = cli.Command{
@@ -17,7 +17,7 @@ import (
 //}
 
 var ConnectCmd = cli.Command{
-	Name: "connect",
+	Name:  "connect",
 	Usage: "CLINK connect [nodeAddress]",
 	Action: func(c *cli.Context) error {
 		nodeAddress := c.Args().Get(0)

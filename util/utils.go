@@ -1,8 +1,8 @@
 package util
 
 import (
-	"reflect"
 	"bbrHack/node"
+	"reflect"
 )
 
 func SliceExists(slice interface{}, item interface{}) bool {
@@ -28,4 +28,23 @@ func NodeExists(nodeList node.NodeList, check node.Node) bool {
 		}
 	}
 	return false
+}
+
+// ReverseBytes reverses a byte array
+func ReverseBytes(data []byte) {
+	for i, j := 0, len(data)-1; i < j; i, j = i+1, j-1 {
+		data[i], data[j] = data[j], data[i]
+	}
+}
+
+func Equal(a, b []byte) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
 }
