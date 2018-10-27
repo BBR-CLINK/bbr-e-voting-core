@@ -1,12 +1,12 @@
 package server
 
 import (
-	"bbrHack/node"
+	"bbr-e-voting-core/node"
 	"log"
 	"net"
 	"sync"
 
-		"bbrHack/blockchain"
+		"bbr-e-voting-core/blockchain"
 	"time"
 	"fmt"
 )

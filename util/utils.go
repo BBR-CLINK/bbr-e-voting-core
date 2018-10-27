@@ -1,7 +1,7 @@
 package util
 
 import (
-	"bbrHack/node"
+	"bbr-e-voting-core/node"
 	"reflect"
 )
 

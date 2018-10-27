@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bbrHack/server"
-	"bbrHack/sub"
+	"bbr-e-voting-core/server"
+	"bbr-e-voting-core/sub"
 	"github.com/urfave/cli"
 	"log"
 	"os"
