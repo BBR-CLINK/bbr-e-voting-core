@@ -5,7 +5,7 @@ import (
 	"encoding/gob"
 	"log"
 	"crypto/sha256"
-	"bbrHack/util"
+	"bbr-e-voting-core/util"
 	"time"
 )
 type VoteType struct {

@@ -1,8 +1,8 @@
 package server
 
 import (
-	"bbrHack/node"
-	"bbrHack/util"
+	"bbr-e-voting-core/node"
+	"bbr-e-voting-core/util"
 	"log"
 	"net"
 	"strings"
