@@ -204,7 +204,13 @@ func (bc *Blockchain) FindVoteReg(meta []byte) (*VoteType, error) {
 //	for {
 //		block := bci.Next()
 //
-//		if block.Votes[0].Voting == nil && util.Equal(block.Votes[0].Account.PublicKey)
+//		if block.Votes[0].Voting == nil && util.Equal(block.Votes[0].Account.PublicKey, publicKey) && util.Equal(block.Votes[0].VoteType.Meta, meta) {
+//			return true
+//		}
+//
+//		if len(block.PreviousHash) == 0 {
+//			return false
+//		}
 //	}
 //
 //}

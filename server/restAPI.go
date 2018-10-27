@@ -8,7 +8,9 @@ import (
 	"net/http"
 	"bbr-e-voting-core/blockchain"
 	"strconv"
-	)
+		"os"
+	"github.com/gorilla/handlers"
+)
 
 type RestAPI struct {
 }
@@ -146,6 +148,9 @@ func voteType(w http.ResponseWriter, r *http.Request) {
 }
 
 func getBlock(w http.ResponseWriter, r *http.Request) {
+	parameter, found := mux.Vars(r)["index"]
+	fmt.Println("parameter : ", parameter)
+	fmt.Println("found : ", found)
 	query, _ := r.URL.Query()["index"]
 	index, _ := strconv.Atoi(query[0])
 	fmt.Println(index)
@@ -167,10 +172,15 @@ func (rest RestAPI) handleRequest(restPort string) {
 	r.HandleFunc("/voteReg", voteReg).Methods("POST")
 	r.HandleFunc("/voteType", voteType).Methods("POST")
 	r.HandleFunc("/getBlock", getBlock).Methods("GET")
+	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With"})
+	originsOk := handlers.AllowedOrigins([]string{os.Getenv("ORIGIN_ALLOWED")})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+
 	semiTcpPort := ":" + restPort
-	if err := http.ListenAndServe(semiTcpPort, r); err != nil {
-		log.Fatal(err)
-	}
+	//if err := http.ListenAndServe(semiTcpPort, r); err != nil {
+	//	log.Fatal(err)
+	//}
+	log.Fatal(http.ListenAndServe(semiTcpPort, handlers.CORS(originsOk, headersOk, methodsOk)(r)))
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
