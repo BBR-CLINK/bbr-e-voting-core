@@ -5,11 +5,17 @@ import (
 	"log"
 	"net"
 	"sync"
-	"time"
-		)
 
-var mutx = &sync.Mutex{}
+		"bbrHack/blockchain"
+	"time"
+	)
+
+var mutex = &sync.Mutex{}
 var NodeList = node.NodeList{} // 전역 변수 어떻게 없애지
+var Bc = &blockchain.Blockchain{}
+var Ln = struct{
+	ln net.Listener
+}{}
 
 func StartServer(tcpPort string, restPort string) {
 	nodeIP := GetOutboundIP()
@@ -21,33 +27,35 @@ func StartServer(tcpPort string, restPort string) {
 		log.Panic(err)
 	}
 
+	Ln.ln = ln // 글로벌 극혐 코드 망함
+
 	defer ln.Close()
+
+	Bc = blockchain.LoadBlockchain(tcpPort)
+
+	time.Sleep(5 * time.Second)
+
+// 이걸 어떻게 넣어서 연결시킬지. 그냥 글로벌하게 할까...
+	go func() {
+			for {
+				time.Sleep(5 * time.Second)
+				mutex.Lock()
+				if len(blockchain.BlockPool.Block) != 0  {
+					exchange(ln, NodeList, blockchain.BlockPool.Block[0])
+				}
+				mutex.Unlock()
+			}
+	}()
 
 	restAPI := RestAPI{}
 	restAPI.handleRequest(restPort)
-//	bc := blockchain.CreateBlockchain(nodeAddress)
-// 이걸 어떻게 넣어서 연결시킬지. 그냥 글로벌하게 할까...
-	go func() {
-		for {
-			time.Sleep(5 * time.Second)
-			mutex.Lock()
-			exchange(ln, NodeList)
-			mutex.Unlock()
-		}
-	}()
-
-	for {
-		time.Sleep(10 * time.Second)
-	}
-
 }
 
-func exchange(ln net.Listener, nodeList node.NodeList) {
-
+func exchange(ln net.Listener, nodeList node.NodeList, block *blockchain.Block) {
 	dataExchange := BlockExchange{}
 	// 교환 주기 생각할 것
 	for i := 0; i < len(nodeList.NodeList); i++ {
-		dataExchange.DataExchange(ln, nodeList.NodeList[i])
+		dataExchange.BlockExchange(ln, nodeList.NodeList[i], block)
 	}
 }
 

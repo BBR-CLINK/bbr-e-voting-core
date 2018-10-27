@@ -8,7 +8,7 @@ import (
 	"time"
 	)
 
-const dbFile = "blockchain_%s.db"
+var dbFile = "%s_blockData"
 const genesisData = "C-LINK E-VOTING SYSTEM"
 
 type Blockchain struct {
@@ -16,8 +16,8 @@ type Blockchain struct {
 	db *leveldb.DB
 }
 
-func CreateBlockchain(nodeAddress string) *Blockchain {
-	dbFile := fmt.Sprintf(dbFile, nodeAddress)
+func CreateBlockchain(port string) *Blockchain {
+	dbFile := fmt.Sprintf(dbFile, port)
 	if dbExists(dbFile) {
 		log.Printf("[Blockchain] blockchain already exists.")
 		os.Exit(1)
@@ -52,12 +52,11 @@ func CreateBlockchain(nodeAddress string) *Blockchain {
 }
 
 // Load Blockchain. if dosen't exist, Create Blockchain
-func LoadBlockchain(nodeAddress string) *Blockchain {
-	dbFile := fmt.Sprintf(dbFile, nodeAddress)
+func LoadBlockchain(port string) *Blockchain {
+	dbFile := fmt.Sprintf(dbFile, port)
 	if dbExists(dbFile) == false {
 		log.Printf("[Blockchain] No existing blockchain found. Create one first.")
-		os.Exit(1)
-		// 여기에 blockchain 새로 생성하는거 해줘야 할까?
+		return CreateBlockchain(port)
 	}
 
 	var tip []byte
@@ -86,6 +85,36 @@ func (bc *Blockchain) AddBlock(block *Block){
 	if err != nil {
 		log.Panic(err)
 	}
+}
+
+// GetBestHeight returns the height of the latest block
+func (bc *Blockchain) GetLastBlock() *Block {
+	var lastBlock Block
+
+	// db, err := leveldb.OpenFile(dbFile, nil)
+	// defer db.Close()
+
+	lastHash, err := bc.db.Get([]byte("1"), nil)
+	if err != nil {
+		log.Panic(err)
+	}
+	blockData, err := bc.db.Get(lastHash, nil)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	lastBlock = *DeserializeBlock(blockData)
+
+	return &lastBlock
+}
+
+func (bc *Blockchain) GetLastHash() []byte {
+	lastHash, err := bc.db.Get([]byte("1"), nil)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	return lastHash
 }
 
 func dbExists(dbFile string) bool {

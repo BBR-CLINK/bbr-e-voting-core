@@ -6,7 +6,8 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	)
+	"bbrHack/blockchain"
+)
 
 type RestAPI struct {
 }
@@ -49,10 +50,29 @@ func nodeList(w http.ResponseWriter, r *http.Request) {
 func voteReg(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var voteReg VoteReg
+	candidate := [][]byte{}
 
 	if err := json.NewDecoder(r.Body).Decode(&voteReg); err != nil {
 		log.Fatal(err)
 	}
+
+	for _, value := range voteReg.Candidate{
+		candidate = append(candidate, []byte(value))
+	}
+
+	voteType := blockchain.VoteType{
+		S_timestamp: voteReg.S_timestamp,
+		E_timestamp: voteReg.E_timestamp,
+		Name: []byte(voteReg.Name),
+		Meta: []byte(voteReg.Meta),
+		Candidate: candidate,
+	}
+	vote := blockchain.NewVote(blockchain.Account{}, []byte{}, &voteType)
+	vote.SetID()
+
+	lastBlock := Bc.GetLastBlock()
+	currentBlock := blockchain.NewBlock([]*blockchain.Vote{vote}, lastBlock.Hash, lastBlock.Index)
+	blockchain.BlockPool.Block = append(blockchain.BlockPool.Block, currentBlock)
 }
 
 func voting(w http.ResponseWriter, r *http.Request) {
@@ -62,6 +82,7 @@ func voting(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&voting); err != nil {
 		log.Fatal(err)
 	}
+
 
 	fmt.Fprintf(w, "voting : " + voting.Voting)
 	fmt.Fprintf(w, "account : %x", []byte(voting.Account)) // byte로 어떻게 받아오는지

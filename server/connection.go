@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 	"strings"
-)
+	)
 
 func Connect(nodeAddress string) {
 	conn, err := net.Dial("tcp", nodeAddress)

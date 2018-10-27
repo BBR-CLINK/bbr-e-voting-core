@@ -31,7 +31,12 @@ func (b *Block) HashVotes() []byte {
 
 func NewBlock(votes []*Vote, previousHash []byte, index int) *Block {
 	block := &Block{time.Now().Unix(), previousHash, []byte{}, index, votes }
-	// poa := NewPoA()
+	poa := NewPoA(block)
+	err := poa.Validate()
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 	// 합의 알고리즘 : hash 반환
 	return block
 }
@@ -59,4 +64,17 @@ func (b *Block) Serialize() []byte {
 	}
 
 	return encoded.Bytes()
+}
+
+// DeserializeBlock : byte -> Block 역직렬화
+func DeserializeBlock(d []byte) *Block {
+	var block Block
+
+	decoder := gob.NewDecoder(bytes.NewReader(d))
+	err := decoder.Decode(&block)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	return &block
 }
