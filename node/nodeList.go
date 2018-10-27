@@ -1,5 +1,5 @@
 package node
 
-type NodeList struct{
+type NodeList struct {
 	NodeList []Node
 }

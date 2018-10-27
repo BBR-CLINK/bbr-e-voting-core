@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/urfave/cli"
-		"log"
-	"os"
-	"bbrHack/sub"
 	"bbrHack/server"
-	)
+	"bbrHack/sub"
+	"github.com/urfave/cli"
+	"log"
+	"os"
+)
 
 func main() {
 	app := cli.NewApp()
@@ -14,21 +14,21 @@ func main() {
 	app.Usage = "BBR Hackathon"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name : "tcpPort, tp",
-			Value : "",
-			Usage : "set node tcpPort",
+			Name:  "tcpPort, tp",
+			Value: "",
+			Usage: "set node tcpPort",
 		},
 		cli.StringFlag{
-			Name : "restPort, rp",
-			Value : "",
-			Usage : "set node restPort",
+			Name:  "restPort, rp",
+			Value: "",
+			Usage: "set node restPort",
 		},
 	}
 	app.Commands = []cli.Command{}
 	//app.Commands = append(app.Commands, sub.StartCmd)
 	app.Commands = append(app.Commands, sub.ConnectCmd)
 	/*
-	connect, disconnect, 정도만
+		connect, disconnect, 정도만
 	*/
 	app.Before = func(c *cli.Context) error {
 		tcpPort := c.String("tcpPort")

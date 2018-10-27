@@ -1,14 +1,14 @@
 package server
 
 import (
-	"net"
-	"log"
-	"strings"
 	"bbrHack/node"
 	"bbrHack/util"
-)
+	"log"
+	"net"
+	"strings"
+	)
 
-func Connect(nodeAddress string) {
+func Connect(nodeAddress string) net.Conn{
 	conn, err := net.Dial("tcp", nodeAddress)
 	if err != nil {
 		log.Printf("[connect] %s is not available\n", nodeAddress)
@@ -27,4 +27,5 @@ func Connect(nodeAddress string) {
 			NodeList.NodeList = append(NodeList.NodeList, node)
 		}
 	}
+	return conn
 }
