@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"bbr-e-voting-core/blockchain"
 	"strconv"
-)
+	)
 
 type RestAPI struct {
 }
@@ -96,7 +96,22 @@ func voting(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	voteType := Bc.FindVoteReg([]byte(voting.Meta))
+	//voteType, err := Bc.FindVoteReg([]byte(voting.Meta))
+	//if err != nil {
+	//	log.Panic(err)
+	//}
+	//
+	//
+	//
+	//vote := blockchain.Vote{
+	//	N_timestamp: time.Now().Unix(),
+	//	Account: blockchain.Account{
+	//		PublicKey: voting.Account,
+	//		Token1: 0,
+	//		Token2:
+	//	}
+	//}
+
 	/*
 	1. token 확인
 	2. VoteType 확인
@@ -121,7 +136,11 @@ func voteType(w http.ResponseWriter, r *http.Request) {
 	}
 	enableCors(&w)
 
-	voteType := Bc.FindVoteReg([]byte(votingType.Meta))
+	setupResponse(&w, r)
+	voteType, err := Bc.FindVoteReg([]byte(votingType.Meta))
+	if err != nil {
+		log.Panic(err)
+	}
 	fmt.Println(voteType)
 	respondWithJSON(w, http.StatusOK, voteType)
 }
@@ -154,11 +173,16 @@ func (rest RestAPI) handleRequest(restPort string) {
 	}
 }
 
-
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, _ := json.Marshal(payload)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	w.Write(response)
+}
+
+func setupResponse(w *http.ResponseWriter, req *http.Request) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 }
