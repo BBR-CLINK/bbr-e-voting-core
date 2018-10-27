@@ -1,8 +1,8 @@
 package server
 
 import (
-	"bbrHack/blockchain"
-	"bbrHack/node"
+	"bbr-e-voting-core/blockchain"
+	"bbr-e-voting-core/node"
 	"bytes"
 	"encoding/gob"
 		"io"

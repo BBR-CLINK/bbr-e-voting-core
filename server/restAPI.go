@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"bbrHack/blockchain"
+	"bbr-e-voting-core/blockchain"
 )
 
 type RestAPI struct {

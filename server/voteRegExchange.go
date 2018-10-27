@@ -2,12 +2,12 @@ package server
 
 import (
 	"net"
-	"bbrHack/node"
+	"bbr-e-voting-core/node"
 	"log"
 	"io"
 	"bytes"
 	"encoding/gob"
-	"bbrHack/blockchain"
+	"bbr-e-voting-core/blockchain"
 )
 
 type voteRegExchange struct {

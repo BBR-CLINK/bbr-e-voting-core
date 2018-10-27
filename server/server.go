@@ -6,7 +6,7 @@ import (
 	"net"
 	"sync"
 
-		"bbrHack/blockchain"
+		"bbr-e-voting-core/blockchain"
 	"time"
 	"fmt"
 )

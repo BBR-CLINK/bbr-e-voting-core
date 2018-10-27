@@ -1,7 +1,7 @@
 package sub
 
 import (
-	"bbrHack/server"
+	"bbr-e-voting-core/server"
 	"github.com/urfave/cli"
 )
 
