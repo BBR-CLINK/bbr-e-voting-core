@@ -8,7 +8,8 @@ import (
 
 		"bbrHack/blockchain"
 	"time"
-	)
+	"fmt"
+)
 
 var mutex = &sync.Mutex{}
 var NodeList = node.NodeList{} // 전역 변수 어떻게 없애지
@@ -40,8 +41,13 @@ func StartServer(tcpPort string, restPort string) {
 			for {
 				time.Sleep(5 * time.Second)
 				mutex.Lock()
-				if len(blockchain.BlockPool.Block) != 0  {
+				fmt.Println("size : %d	",len(blockchain.BlockPool.Block))
+				if len(blockchain.BlockPool.Block) == 0  {
+					exchange(ln, NodeList, &blockchain.Block{})
+				} else {
 					exchange(ln, NodeList, blockchain.BlockPool.Block[0])
+					blockchain.BlockPool.Block = append(blockchain.BlockPool.Block[:0], blockchain.BlockPool.Block[1:]...)
+					fmt.Println("size : %d	",len(blockchain.BlockPool.Block))
 				}
 				mutex.Unlock()
 			}
@@ -55,6 +61,8 @@ func exchange(ln net.Listener, nodeList node.NodeList, block *blockchain.Block) 
 	dataExchange := BlockExchange{}
 	// 교환 주기 생각할 것
 	for i := 0; i < len(nodeList.NodeList); i++ {
+		address := nodeList.NodeList[i].IP + ":" +nodeList.NodeList[i].Port
+		nodeList.NodeList[i].Conn = Connect(address)
 		dataExchange.BlockExchange(ln, nodeList.NodeList[i], block)
 	}
 }
