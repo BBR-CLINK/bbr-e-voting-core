@@ -7,7 +7,8 @@ import (
 	"log"
 	"net/http"
 	"bbr-e-voting-core/blockchain"
-	)
+	"strconv"
+)
 
 type RestAPI struct {
 }
@@ -26,7 +27,12 @@ type VoteReg struct {
 
 type Voting struct {
 	Account []byte
+	Meta string
 	Voting  string
+}
+
+type VotingType struct {
+	Meta string
 }
 
 func nodeDiscovery(w http.ResponseWriter, r *http.Request) {
@@ -59,6 +65,7 @@ func voteReg(w http.ResponseWriter, r *http.Request) {
 	for _, value := range voteReg.Candidate{
 		candidate = append(candidate, []byte(value))
 	}
+	enableCors(&w)
 
 	voteType := blockchain.VoteType{
 		S_timestamp: voteReg.S_timestamp,
@@ -71,10 +78,14 @@ func voteReg(w http.ResponseWriter, r *http.Request) {
 	vote.SetID()
 
 	lastBlock := Bc.GetLastBlock()
-	currentBlock := blockchain.NewBlock([]*blockchain.Vote{vote}, lastBlock.Hash, lastBlock.Index)
+	currentBlock := blockchain.NewBlock([]*blockchain.Vote{vote}, lastBlock.Hash, lastBlock.Index+1)
 	blockchain.BlockPool.Block = append(blockchain.BlockPool.Block, currentBlock)
-
+	Bc.AddBlock(currentBlock)
 	w.Write([]byte("VoteReg Success"))
+}
+
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }
 
 func voting(w http.ResponseWriter, r *http.Request) {
@@ -84,6 +95,7 @@ func voting(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&voting); err != nil {
 		log.Fatal(err)
 	}
+
 	/*
 	1. token 확인
 	2. VoteType 확인
@@ -99,6 +111,28 @@ func voting(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "account : %x", []byte(voting.Account)) // byte로 어떻게 받아오는지
 }
 
+func voteType(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	var votingType VotingType
+
+	if err := json.NewDecoder(r.Body).Decode(&votingType); err != nil {
+		log.Fatal(err)
+	}
+
+	voteType := Bc.FindVoteReg([]byte(votingType.Meta))
+	fmt.Println(voteType)
+	respondWithJSON(w, http.StatusOK, voteType)
+}
+
+func getBlock(w http.ResponseWriter, r *http.Request) {
+	query, _ := r.URL.Query()["index"]
+	index, _ := strconv.Atoi(query[0])
+	fmt.Println(index)
+	block := Bc.FindBlockByIndex(index)
+
+	respondWithJSON(w, http.StatusOK, block)
+}
+
 func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Homepage Endpoint Hit")
 }
@@ -110,8 +144,19 @@ func (rest RestAPI) handleRequest(restPort string) {
 	r.HandleFunc("/list", nodeList).Methods("GET")
 	r.HandleFunc("/voting", voting).Methods("POST")
 	r.HandleFunc("/voteReg", voteReg).Methods("POST")
+	r.HandleFunc("/voteType", voteType).Methods("POST")
+	r.HandleFunc("/getBlock", getBlock).Methods("GET")
 	semiTcpPort := ":" + restPort
 	if err := http.ListenAndServe(semiTcpPort, r); err != nil {
 		log.Fatal(err)
 	}
+}
+
+
+func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+	response, _ := json.Marshal(payload)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	w.Write(response)
 }

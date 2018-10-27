@@ -6,8 +6,8 @@ import (
 	"os"
 	"log"
 	"time"
-	//"bbr-e-voting-core/util"
-)
+	"bbr-e-voting-core/util"
+	)
 
 var dbFile = "%s_blockData"
 const genesisData = "C-LINK E-VOTING SYSTEM"
@@ -123,6 +123,38 @@ func (bc *Blockchain) GetLastHash() []byte {
 	return lastHash
 }
 
+// GetBestHeight returns the height of the latest block
+func (bc *Blockchain) GetBestHeight() int {
+	var lastBlock Block
+
+	lastHash := bc.GetLastHash()
+	blockData, err := bc.db.Get(lastHash, nil)
+	if err != nil {
+		log.Panic(err)
+	}
+	lastBlock = *DeserializeBlock(blockData)
+
+	return lastBlock.Index
+}
+
+// 블록체인 상의 블록 해쉬들을 반환
+func (bc *Blockchain) GetBlockHashes() [][]byte {
+	var blocks [][]byte
+	bci := bc.Iterator()
+
+	for {
+		block := bci.Next()
+
+		blocks = append(blocks, block.Hash)
+
+		if len(block.PreviousHash) == 0 {
+			break
+		}
+	}
+
+	return blocks
+}
+
 // Iterator 체인의 끝을 가리킨다.
 func (bc *Blockchain) Iterator() *BlockchainIterator {
 	bci := &BlockchainIterator{bc.tip, bc.db}
@@ -145,15 +177,34 @@ func (i *BlockchainIterator) Next() *Block {
 	return block
 }
 
-//func (bc *Blockchain) FindVoteReg(meta []byte) *VoteType {
-//	//bci := bc.Iterator()
-//	//
-//	//for {
-//	//	block := bci.Next()
-//	//
-//	//	util.Equal(block.Votes[0].VoteType.Meta)
-//	//}
-//}
+func (bc *Blockchain) FindVoteReg(meta []byte) *VoteType {
+	bci := bc.Iterator()
+	var voteType *VoteType
+	for {
+		block := bci.Next()
+
+		if util.Equal(block.Votes[0].VoteType.Meta, meta) && time.Now().Unix() > block.Votes[0].VoteType.S_timestamp && time.Now().Unix() < block.Votes[0].VoteType.E_timestamp {
+			voteType = block.Votes[0].VoteType
+		}
+
+		if len(block.PreviousHash) == 0 {
+			break;
+		}
+	}
+
+	return voteType
+}
+
+func (bc *Blockchain) FindBlockByIndex(index int) *Block {
+	bci := bc.Iterator()
+	for {
+		block := bci.Next()
+
+		if block.Index == index{
+			return block
+		}
+	}
+}
 
 func dbExists(dbFile string) bool {
 	if _, err := os.Stat(dbFile); os.IsNotExist(err) {
