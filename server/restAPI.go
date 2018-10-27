@@ -7,8 +7,7 @@ import (
 	"log"
 	"net/http"
 	"bbr-e-voting-core/blockchain"
-	"math/rand"
-)
+	)
 
 type RestAPI struct {
 }
@@ -91,10 +90,10 @@ func voting(w http.ResponseWriter, r *http.Request) {
 	3. Vote 설정
 	 */
 
-	for _, node := range NodeList.NodeList {
-		randNum := rand.Intn(len(NodeList.NodeList))
-
-	}
+	//for _, node := range NodeList.NodeList {
+	//	randNum := rand.Intn(len(NodeList.NodeList))
+	//
+	//}
 
 	fmt.Fprintf(w, "voting : " + voting.Voting)
 	fmt.Fprintf(w, "account : %x", []byte(voting.Account)) // byte로 어떻게 받아오는지

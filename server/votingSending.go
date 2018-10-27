@@ -19,7 +19,7 @@ func (be BlockExchange) VotingSending(ln net.Listener, connNeighbor node.Node, v
 		if err != nil {
 			log.Panic(err)
 		}
-		sendVote(block, connNeighbor)
+		//sendVote(block, connNeighbor)
 		go handleVote(connMe, connNeighbor)
 	}()
 }
