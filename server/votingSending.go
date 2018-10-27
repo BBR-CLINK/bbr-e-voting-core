@@ -5,28 +5,28 @@ import (
 	"bbr-e-voting-core/node"
 	"bytes"
 	"encoding/gob"
-		"io"
+	"io"
 	"log"
 	"net"
-		)
+)
 
-type BlockExchange struct {
+type VotingSending struct {
 }
 
-func (be BlockExchange) BlockExchange(ln net.Listener, connNeighbor node.Node, block *blockchain.Block) {
+func (be BlockExchange) VotingSending(ln net.Listener, connNeighbor node.Node, vote *blockchain.Vote) {
 	go func() {
 		connMe, err := ln.Accept()
 		if err != nil {
 			log.Panic(err)
 		}
-		sendBlock(block, connNeighbor)
-		go handleBlock(connMe, connNeighbor)
+		sendVote(block, connNeighbor)
+		go handleVote(connMe, connNeighbor)
 	}()
 }
 
-func sendBlock(block *blockchain.Block, connNeighbor node.Node) {
-	request := append(CommandToBytes("block"), block.Serialize()...)
-	log.Printf("[Block] Send Block to %s", connNeighbor.IP)
+func sendVote(block *blockchain.Block, connNeighbor node.Node) {
+	request := append(CommandToBytes("vote"), block.Serialize()...)
+	log.Printf("[Block] Send Vote to %s", connNeighbor.IP)
 	//spew.Dump(block)
 	_, err := io.Copy(connNeighbor.Conn, bytes.NewReader(request))
 	if err != nil {
@@ -34,7 +34,7 @@ func sendBlock(block *blockchain.Block, connNeighbor node.Node) {
 	}
 }
 
-func handleBlock(connMe net.Conn, connNeighbor node.Node) {
+func handleVote(connMe net.Conn, connNeighbor node.Node) {
 	request := make([]byte, 4096)
 
 	n, err := connMe.Read(request)
@@ -47,12 +47,12 @@ func handleBlock(connMe net.Conn, connNeighbor node.Node) {
 	command := BytesToCommand(request[:CommandLength])
 
 	switch command {
-	case "block":
-		receiveBlock(request, connNeighbor)
+	case "vote":
+		receiveVote(request, connNeighbor)
 	}
 
 }
-func receiveBlock(request []byte, connNeighbor node.Node) {
+func receiveVote(request []byte, connNeighbor node.Node) {
 	var buff bytes.Buffer
 	var payload blockchain.Block
 

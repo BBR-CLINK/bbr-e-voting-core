@@ -6,13 +6,19 @@ import (
 	"os"
 	"log"
 	"time"
-	)
+	//"bbr-e-voting-core/util"
+)
 
 var dbFile = "%s_blockData"
 const genesisData = "C-LINK E-VOTING SYSTEM"
 
 type Blockchain struct {
 	tip []byte
+	db *leveldb.DB
+}
+
+type BlockchainIterator struct {
+	currentHash []byte
 	db *leveldb.DB
 }
 
@@ -116,6 +122,38 @@ func (bc *Blockchain) GetLastHash() []byte {
 
 	return lastHash
 }
+
+// Iterator 체인의 끝을 가리킨다.
+func (bc *Blockchain) Iterator() *BlockchainIterator {
+	bci := &BlockchainIterator{bc.tip, bc.db}
+
+	return bci
+}
+
+// Next ...
+func (i *BlockchainIterator) Next() *Block {
+	var block *Block
+
+	encodedBlock, err := i.db.Get([]byte(i.currentHash), nil)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	block = DeserializeBlock(encodedBlock)
+	i.currentHash = block.PreviousHash
+
+	return block
+}
+
+//func (bc *Blockchain) FindVoteReg(meta []byte) *VoteType {
+//	//bci := bc.Iterator()
+//	//
+//	//for {
+//	//	block := bci.Next()
+//	//
+//	//	util.Equal(block.Votes[0].VoteType.Meta)
+//	//}
+//}
 
 func dbExists(dbFile string) bool {
 	if _, err := os.Stat(dbFile); os.IsNotExist(err) {
